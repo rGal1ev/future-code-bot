@@ -3,6 +3,9 @@ from random import sample
 
 
 def generate_task_solution(task: Task, task_answers: list[TaskAnswer]):
+    if len(task_answers) < task.min_answers_count:
+        return "empty"
+
     random_answers = sample(task_answers, task.min_answers_count)
     random_answers.sort(key=lambda item: item.number)
 

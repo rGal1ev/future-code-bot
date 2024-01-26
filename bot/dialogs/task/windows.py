@@ -16,7 +16,7 @@ from .utils import (
 
 from ..state import TaskWindow
 from .templates import main_window_template, new_module_window_template, new_task_window_template, \
-    task_answer_edit_window_template
+    task_answer_edit_window_template, solution_preview_window_template
 from .data import list_window_data, new_module_data, new_task_data, answer_tasks_data, solution_preview_data
 
 list_window = Window(
@@ -272,7 +272,7 @@ task_answer_edit_window = Window(
 
 
 solution_preview_window = Window(
-    Jinja("""<pre language="python">{{solution}}</pre>"""),
+    solution_preview_window_template,
 
     Row(
         SwitchTo(

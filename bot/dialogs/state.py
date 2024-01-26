@@ -14,3 +14,11 @@ class TaskWindow(StatesGroup):
 
     task_answers_edit = State()
     task_answer_edit = State()
+
+
+class TestWindow(StatesGroup):
+    list = State()
+    preview = State()
+
+    answers_edit = State()
+    answer_edit = State()

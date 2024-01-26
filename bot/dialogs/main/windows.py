@@ -1,48 +1,58 @@
+from aiogram.methods import Close
 from aiogram.types import CallbackQuery
-from aiogram_dialog import Window, DialogManager, ShowMode
-from aiogram_dialog.widgets.kbd import Row, Button, Url, Column, Start
-from aiogram_dialog.widgets.text import Const, Text
-from ..state import MainWindow, TaskWindow
+from aiogram_dialog import Window, DialogManager
+from aiogram_dialog.widgets.kbd import Button, Url, Column, Row, Cancel
+from aiogram_dialog.widgets.text import Const
+
+from .templates import main_window_template
+from ..state import MainWindow, TaskWindow, TestWindow
 from os import getenv
 
 
-async def handle_task(callback: CallbackQuery, button: Button,
-                      manager: DialogManager):
+async def handle_switch(callback: CallbackQuery, button: Button,
+                        manager: DialogManager):
     is_user_admin = str(callback.from_user.id) in getenv("ADMIN_ID")
 
-    await manager.start(
-        state=TaskWindow.list,
-        data={
-            "is_admin": is_user_admin
-        }
-    )
+    if button.widget_id == "task":
+        await manager.start(
+            state=TaskWindow.list,
+            data={
+                "is_admin": is_user_admin
+            }
+        )
+
+    else:
+        await manager.start(
+            state=TestWindow.list,
+            data={
+                "is_admin": is_user_admin
+            }
+        )
 
 
 main_window = Window(
-    Const(
-        text="#КодБудущего"
-    ),
+    main_window_template,
     Column(
         Button(
-            text=Const("Самостоятельные"),
-            id="handle_task",
-            on_click=handle_task
+            text=Const("❶ Самостоятельные"),
+            id="task",
+            on_click=handle_switch
         ),
         Button(
-            text=Const("Аттестации"),
-            id="empty",
+            text=Const("❷ Аттестации"),
+            id="test",
+            on_click=handle_switch
         ),
     ),
 
     Row(
-        Url(
-            text=Const("Сайт"),
-            url=Const("https://online-vstu.ru/login")
+        Cancel(
+            text=Const("✖ Завершить")
         ),
         Url(
-            text=Const("Учитель"),
-            url=Const("https://t.me/rgal1ev")
-        )
+            text=Const("🌐 Сайт"),
+            url=Const("https://online-vstu.ru/login")
+        ),
     ),
 
     state=MainWindow.main

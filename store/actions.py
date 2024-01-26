@@ -1,6 +1,7 @@
 import aiosqlite
 from os import getenv
 from store.models import Module, Task, TaskAnswer
+from store.models.test_answer import TestAnswer
 
 SQLITE_PATH = getenv("SQLITE_PATH")
 
@@ -157,3 +158,62 @@ async def delete_task_answer_by_id(task_answer: int):
         await connection.execute(f"DELETE FROM TaskAnswers WHERE ID = {task_answer}")
         await connection.commit()
 
+
+async def get_test_answers(module_id: int) -> list[TestAnswer]:
+    async with aiosqlite.connect(SQLITE_PATH) as connection:
+        test_answers = []
+        connection.row_factory = aiosqlite.Row
+
+        async with connection.execute(f"SELECT * FROM TestAnswers WHERE MODULE_ID = {module_id} ORDER BY NUMBER") as cursor:
+            async for row in cursor:
+                test_answers.append(
+                    TestAnswer(
+                        id=row["ID"],
+                        number=row["NUMBER"],
+                        value=row["VALUE"]
+                    )
+                )
+
+            return test_answers
+
+
+async def update_test_answer(test_answer_id: int, number: int, value: str):
+    async with aiosqlite.connect(SQLITE_PATH) as connection:
+        connection.row_factory = aiosqlite.Row
+
+        await connection.execute("""
+            UPDATE TestAnswers
+            SET NUMBER = ?,
+                VALUE = ?
+
+            WHERE
+                ID = ?
+        """, [number, value, test_answer_id])
+
+        await connection.commit()
+
+
+async def add_test_answer(module_id: int, number: int, value: str) -> None:
+    async with aiosqlite.connect(SQLITE_PATH) as connection:
+        await connection.execute("""
+            INSERT INTO TestAnswers(VALUE, NUMBER, MODULE_ID) VALUES (?, ?, ?)
+        """, [value, number, module_id])
+
+        await connection.commit()
+
+
+async def get_test_answer_by_id(test_answer_id: int) -> TestAnswer:
+    async with aiosqlite.connect(SQLITE_PATH) as connection:
+        connection.row_factory = aiosqlite.Row
+
+        async with connection.execute(f"SELECT * FROM TestAnswers WHERE ID = {test_answer_id}") as cursor:
+            async for row in cursor:
+                return TestAnswer(id=row["ID"],
+                                  number=row["NUMBER"],
+                                  value=row["VALUE"])
+
+
+async def delete_test_answer_by_id(test_answer: int):
+    async with aiosqlite.connect(SQLITE_PATH) as connection:
+        await connection.execute(f"DELETE FROM TestAnswers WHERE ID = {test_answer}")
+        await connection.commit()

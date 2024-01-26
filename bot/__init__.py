@@ -4,8 +4,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from os import getenv
 
 from aiogram_dialog import setup_dialogs
-
-from .dialogs import main, task
+from .dialogs import main, task, test
 
 dispatcher = Dispatcher(
     storage=MemoryStorage()
@@ -13,7 +12,8 @@ dispatcher = Dispatcher(
 
 dispatcher.include_routers(
     main,
-    task
+    task,
+    test
 )
 
 

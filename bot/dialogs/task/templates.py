@@ -39,6 +39,7 @@ new_module_window_template = Jinja("""
 """)
 
 new_task_window_template = Jinja("""
+💡 <b>Самостоятельная работа</b>
 ▼ <b>Заполните все данные ниже</b>
 
 ❶ <b>Номер работы</b>: {{ number if number else 'Не указано' }}
@@ -49,13 +50,22 @@ new_task_window_template = Jinja("""
 """)
 
 task_answer_edit_window_template = Jinja("""
+💡 <b>Ответ самостоятельной</b>
 ▼ <b>Заполните все данные ниже</b>
 
-❶ <b>Номер работы</b>: {{ number if number else 'Не указано' }}
+❶ <b>Номер ответа</b>: {{ number if number else 'Не указано' }}
 ❷ <b>Ответ</b>: {{ '' if value else 'Не указано' }}
 {% if value %}
 <pre language="python">{{ value }}</pre>
 {% endif %}
 
 <i>Для изменения полей, нажмите на кнопку и введите значение</i>
+""")
+
+solution_preview_window_template = Jinja("""
+{% if solution == "empty" %}
+<b>Решение самостоятельной не заполнено</b>
+{% else %}
+<pre language="python">{{solution}}</pre>
+{% endif %}
 """)
