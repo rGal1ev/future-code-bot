@@ -23,7 +23,7 @@ from .data import (
 )
 
 from ..state import TaskWindow
-from ...utils import _and, _not, get_property
+from ...utils import _and, _not, _get
 from ...widgets.alert import AlertTrigger
 
 list_window = Window(
@@ -32,10 +32,10 @@ list_window = Window(
     Column(
         Column(
             Select(
-                Format("» {item.number} - {item.title}"),
+                Format("» {item[number]} - {item[title]}"),
 
                 items="modules",
-                item_id_getter=get_property("id"),
+                item_id_getter=_get("id"),
                 id="module_list",
 
                 on_click=handle_module_select
@@ -56,10 +56,10 @@ list_window = Window(
 
         Column(
             Select(
-                Format("» {item.number} - {item.title}"),
+                Format("» {item[number]} - {item[title]}"),
 
                 items="tasks",
-                item_id_getter=get_property("id"),
+                item_id_getter=_get("id"),
                 id="task_list",
 
                 on_click=handle_task_select
@@ -213,8 +213,8 @@ task_answers_edit_window = Window(
         Select(
             items="task_answers",
             id="task_answers_list",
-            text=Format("» {item.number} Вопрос"),
-            item_id_getter=get_property("id"),
+            text=Format("» {item[number]} Вопрос"),
+            item_id_getter=_get("id"),
             on_click=handle_task_answer_select
         ),
 
@@ -278,7 +278,7 @@ task_answer_edit_window = Window(
     ),
 
     AlertTrigger(
-        text=Format("🔴 Удалить ответ"),
+        text=Const("🔴 Удалить ответ"),
         state=TaskWindow.alert,
 
         title="Удалить ответ?",

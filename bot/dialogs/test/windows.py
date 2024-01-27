@@ -13,7 +13,7 @@ from .events import (
 from .templates import list_window_template, answer_edit_window_template, test_preview_window_template
 from .data import list_window_data, answers_edit_data, test_preview_data
 from ..state import TestWindow
-from ...utils import get_property, _not, _and
+from ...utils import _get, _not, _and
 
 list_window = Window(
     list_window_template,
@@ -23,7 +23,7 @@ list_window = Window(
             Format("» {item.number} - {item.title}"),
 
             items="modules",
-            item_id_getter=get_property("id"),
+            item_id_getter=_get("id"),
             id="module_list",
 
             on_click=handle_module_select
@@ -77,7 +77,7 @@ answers_edit_window = Window(
             Format("» Вопрос {item.number}"),
 
             items="test_answers",
-            item_id_getter=get_property("id"),
+            item_id_getter=_get("id"),
             id="test_list",
             on_click=handle_answer_select
         ),
@@ -166,7 +166,7 @@ test_preview_window = Window(
             Jinja("""» Вопрос {{item.number}}"""),
 
             items="test_answers",
-            item_id_getter=get_property("id"),
+            item_id_getter=_get("id"),
             id="test_list",
             on_click=handle_answer_preview_select
         ),

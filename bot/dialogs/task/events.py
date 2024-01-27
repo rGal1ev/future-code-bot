@@ -78,8 +78,7 @@ async def handle_module_info_input(message: Message,
 async def handle_module_delete(callback: CallbackQuery, button: Button,
                                manager: DialogManager):
     selected_module = manager.dialog_data.get("selected_module")
-
-    result = await delete_module(selected_module.id)
+    result = await delete_module(selected_module["id"])
 
     if result:
         modules = await get_modules()
@@ -116,14 +115,14 @@ async def handle_task_info_input(message: Message,
 
 async def handle_task_create(callback: CallbackQuery, button: Button,
                              manager: DialogManager):
-    module = manager.dialog_data.get("selected_module")
+    module_id = manager.dialog_data.get("selected_module")["id"]
 
     await add_task(title=manager.dialog_data.get("title"),
                    number=int(manager.dialog_data.get("number")),
-                   module_id=module.id,
+                   module_id=module_id,
                    min_answers_count=int(manager.dialog_data.get("min_answers_count")))
 
-    tasks = await get_tasks(module_id=module.id)
+    tasks = await get_tasks(module_id=module_id)
 
     await manager.switch_to(
         state=TaskWindow.list
@@ -140,10 +139,10 @@ async def handle_task_create(callback: CallbackQuery, button: Button,
 
 async def handle_task_delete(callback: CallbackQuery, button: Button,
                              manager: DialogManager):
-    task = manager.dialog_data.get("selected_task")
-    await delete_task(task_id=task.id)
+    task_id = manager.dialog_data.get("selected_task")["id"]
 
-    tasks = await get_tasks(manager.dialog_data.get("selected_module").id)
+    await delete_task(task_id=task_id)
+    tasks = await get_tasks(manager.dialog_data.get("selected_module")["id"])
 
     manager.dialog_data.update({
         "selected_task": None,
@@ -165,8 +164,8 @@ async def handle_task_answer_select(callback: CallbackQuery, widget: any,
         "task_answer_id": item_id,
 
         "selected_task_answer": selected_task_answer,
-        "number": selected_task_answer.number,
-        "value": selected_task_answer.value
+        "number": selected_task_answer["number"],
+        "value": selected_task_answer["value"]
     })
 
     await manager.switch_to(
@@ -194,7 +193,7 @@ async def handle_task_answer_info_input(message: Message,
 
 async def handle_task_answer_saving(callback: CallbackQuery, button: Button,
                                     manager: DialogManager):
-    task_id = manager.dialog_data.get("selected_task").id
+    task_id = manager.dialog_data.get("selected_task")["id"]
     task_answer_id = manager.dialog_data.get("task_answer_id")
     number = manager.dialog_data.get("number")
     value = manager.dialog_data.get("value")
@@ -239,7 +238,7 @@ async def handle_task_answers_edit_transition(callback: CallbackQuery, button: B
 
 async def handle_task_answer_delete(callback: CallbackQuery, button: Button,
                                     manager: DialogManager):
-    task_id = manager.dialog_data.get("selected_task").id
+    task_id = manager.dialog_data.get("selected_task")["id"]
     task_answer_id = manager.dialog_data.get("task_answer_id")
 
     await delete_task_answer_by_id(task_answer_id)

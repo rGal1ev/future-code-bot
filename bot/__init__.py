@@ -10,7 +10,7 @@ from .dialogs import main, task, test
 
 dispatcher = None
 
-if Config.is_dev:
+if Config().is_dev:
     dispatcher = Dispatcher(
         storage=MemoryStorage()
     )
@@ -19,7 +19,6 @@ else:
     dispatcher = Dispatcher(
         storage=RedisStorage(Redis(), DefaultKeyBuilder(with_destiny=True))
     )
-
 
 dispatcher.include_routers(
     main, task, test

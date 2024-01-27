@@ -6,7 +6,7 @@ from store.models.test_answer import TestAnswer
 SQLITE_PATH = getenv("SQLITE_PATH")
 
 
-async def get_modules() -> list[Module]:
+async def get_modules() -> list[dict]:
     modules = []
 
     async with aiosqlite.connect(SQLITE_PATH) as connection:
@@ -14,18 +14,26 @@ async def get_modules() -> list[Module]:
 
         async with connection.execute("SELECT * FROM Modules ORDER BY NUMBER") as cursor:
             async for row in cursor:
-                modules.append(Module(id=row["ID"], title=row["TITLE"], number=row["NUMBER"]))
+                modules.append({
+                    "id": row["ID"],
+                    "title": row["TITLE"],
+                    "number": row["NUMBER"]
+                })
 
             return modules
 
 
-async def get_module_by_id(module_id: int) -> Module:
+async def get_module_by_id(module_id: int) -> dict:
     async with aiosqlite.connect(SQLITE_PATH) as connection:
         connection.row_factory = aiosqlite.Row
 
         async with connection.execute(f"SELECT * FROM Modules WHERE ID = {module_id}") as cursor:
             async for row in cursor:
-                return Module(id=row["ID"], title=row["TITLE"], number=row["NUMBER"])
+                return {
+                    "id": row["ID"],
+                    "title": row["TITLE"],
+                    "number": row["NUMBER"]
+                }
 
 
 async def add_module(number: int, title: str) -> bool:
@@ -44,7 +52,7 @@ async def delete_module(module_id: int) -> bool:
         return connection.total_changes > 0
 
 
-async def get_tasks(module_id: int) -> list:
+async def get_tasks(module_id: int) -> list[dict]:
     tasks = []
     sql = f"""
         SELECT * FROM Tasks
@@ -57,28 +65,30 @@ async def get_tasks(module_id: int) -> list:
 
         async with connection.execute(sql) as cursor:
             async for row in cursor:
-                tasks.append(
-                    Task(id=row["ID"],
-                         title=row["TITLE"],
-                         number=row["NUMBER"],
-                         min_answers_count=row["MIN_ANSWERS_COUNT"],
-                         module_id=row["MODULE_ID"])
-                )
+                tasks.append({
+                    "id": row["ID"],
+                    "title": row["TITLE"],
+                    "number": row["NUMBER"],
+                    "min_answers_count": row["MIN_ANSWERS_COUNT"],
+                    "module_id": row["MODULE_ID"]
+                })
 
             return tasks
 
 
-async def get_task_by_id(task_id: int) -> Task:
+async def get_task_by_id(task_id: int) -> dict:
     async with aiosqlite.connect(SQLITE_PATH) as connection:
         connection.row_factory = aiosqlite.Row
 
         async with connection.execute(f"SELECT * FROM Tasks WHERE ID = {task_id}") as cursor:
             async for row in cursor:
-                return Task(id=row["ID"],
-                            title=row["TITLE"],
-                            number=row["NUMBER"],
-                            min_answers_count=row["MIN_ANSWERS_COUNT"],
-                            module_id=row["MODULE_ID"])
+                return {
+                    "id": row["ID"],
+                    "title": row["TITLE"],
+                    "number": row["NUMBER"],
+                    "min_answers_count": row["MIN_ANSWERS_COUNT"],
+                    "module_id": row["MODULE_ID"]
+                }
 
 
 async def add_task(title: str, number: int,
@@ -102,30 +112,32 @@ async def delete_task(task_id: int) -> bool:
         return connection.total_changes > 0
 
 
-async def get_task_answers(task_id: int) -> list[TaskAnswer]:
+async def get_task_answers(task_id: int) -> list[dict]:
     async with aiosqlite.connect(SQLITE_PATH) as connection:
         task_answers = []
         connection.row_factory = aiosqlite.Row
 
         async with connection.execute(f"SELECT * FROM TaskAnswers WHERE TASK_ID = {task_id} ORDER BY NUMBER") as cursor:
             async for row in cursor:
-                task_answers.append(
-                    TaskAnswer(id=row["ID"],
-                               number=row["NUMBER"],
-                               value=row["VALUE"])
-                )
+                task_answers.append({
+                    "id": row["ID"],
+                    "value": row["VALUE"],
+                    "number": row["NUMBER"]
+                })
             return task_answers
 
 
-async def get_task_answer_by_id(task_answer_id: int) -> TaskAnswer:
+async def get_task_answer_by_id(task_answer_id: int) -> dict:
     async with aiosqlite.connect(SQLITE_PATH) as connection:
         connection.row_factory = aiosqlite.Row
 
         async with connection.execute(f"SELECT * FROM TaskAnswers WHERE ID = {task_answer_id}") as cursor:
             async for row in cursor:
-                return TaskAnswer(id=row["ID"],
-                                  number=row["NUMBER"],
-                                  value=row["VALUE"])
+                return {
+                    "id": row["ID"],
+                    "value": row["VALUE"],
+                    "number": row["NUMBER"]
+                }
 
 
 async def add_task_answer(task_id: int, number: int, value: str) -> None:

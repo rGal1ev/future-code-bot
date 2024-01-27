@@ -6,13 +6,13 @@ main_window_template = Jinja("""
 {% if is_module_selected %}
 {% if selected_module %}
 ─────────
-✦ Выбран <b>{{ selected_module.number }}</b> модуль
-➤ <b>{{ selected_module.title }}</b>
+✦ Выбран <b>{{ selected_module["number"] }}</b> модуль
+➤ <b>{{ selected_module["title"] }}</b>
 {% endif %}
 {% if is_task_selected %}
 ───
-✦ Выбрана <b>{{ selected_task.number }}</b> работа 
-➤ <b>{{ selected_task.title }}</b>
+✦ Выбрана <b>{{ selected_task["number"] }}</b> работа 
+➤ <b>{{ selected_task["title"] }}</b>
 ─────────
 
 ▼ Получить ответ

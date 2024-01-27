@@ -5,6 +5,7 @@ from aiogram.types import CallbackQuery
 from aiogram_dialog import Window, DialogManager
 from aiogram_dialog.widgets.kbd import Button, Row
 from aiogram_dialog.widgets.text import Const, Format, Jinja
+from pickle import loads
 
 from bot.widgets.alert.alert_data import generate_alert_data
 
@@ -33,7 +34,7 @@ def AlertWindow(state: State) -> Window:
 
     async def handle_process_button(callback: CallbackQuery, button: Button,
                                     manager: DialogManager):
-        handler: Callable = manager.dialog_data.get("alert_handler")
+        handler: Callable = loads(manager.dialog_data.get("alert_handler"))
 
         await handler(callback, button, manager)
         await clear_alert_payload(manager)

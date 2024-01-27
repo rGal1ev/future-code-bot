@@ -8,6 +8,7 @@ from aiogram_dialog.widgets.kbd import Button
 from aiogram_dialog.widgets.kbd.button import OnClick
 from aiogram_dialog.widgets.text import Text
 from aiogram_dialog.widgets.widget_event import WidgetEventProcessor
+from pickle import dumps
 
 
 def AlertTrigger(text: Text,
@@ -25,7 +26,7 @@ def AlertTrigger(text: Text,
         alert_payload = {
             "alert_title": title,
             "alert_description": description,
-            "alert_handler": on_process,
+            "alert_handler": dumps(on_process),
             "alert_process_button_text": process_button_text,
             "alert_back_button_text": back_button_text,
             "alert_previous_state": manager.current_context().state

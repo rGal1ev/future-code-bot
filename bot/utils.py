@@ -43,10 +43,10 @@ def _or(*keys: str) -> Predicate:
     return f
 
 
-def get_property(key):
-    def f(item):
+def _get(key):
+    def f(item: dict):
         try:
-            return getattr(item, key)
+            return item.get(key)
 
         except AttributeError:
             return None
