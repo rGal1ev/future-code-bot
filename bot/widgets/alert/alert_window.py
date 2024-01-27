@@ -8,6 +8,7 @@ from aiogram_dialog.widgets.kbd import Button, Row
 from aiogram_dialog.widgets.text import Const, Format, Jinja
 from pickle import loads
 
+from bot.utils import _loads
 from bot.widgets.alert.alert_data import generate_alert_data
 
 template = Jinja("""
@@ -28,7 +29,7 @@ def AlertWindow(state: State) -> Window:
 
     async def handle_back_button(callback: CallbackQuery, button: Button,
                                  manager: DialogManager):
-        previous_state: State = manager.dialog_data.get("alert_previous_state")
+        previous_state: State = _loads(manager.dialog_data.get("alert_previous_state"))
 
         await manager.switch_to(previous_state)
         await clear_alert_payload(manager)
@@ -36,8 +37,7 @@ def AlertWindow(state: State) -> Window:
     async def handle_process_button(callback: CallbackQuery, button: Button,
                                     manager: DialogManager):
         handler_string = manager.dialog_data.get("alert_handler")
-        handler_bytes = base64.b64decode(handler_string)
-        handler: Callable = loads(handler_bytes)
+        handler: Callable = _loads(handler_string)
 
         await handler(callback, button, manager)
         await clear_alert_payload(manager)

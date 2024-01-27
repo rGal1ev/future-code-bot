@@ -1,3 +1,6 @@
+from base64 import b64encode, b64decode
+from pickle import dumps, loads
+
 from aiogram_dialog.widgets.common.when import Predicate
 
 
@@ -52,3 +55,16 @@ def _get(key):
             return None
 
     return f
+
+
+def _dump(item):
+    handler_bytes = dumps(item)
+    handler_string = b64encode(handler_bytes).decode("UTF-8")
+
+    return handler_string
+
+
+def _loads(item):
+    handler_bytes = b64decode(item)
+    loaded_item = loads(handler_bytes)
+    return loaded_item
