@@ -1,7 +1,5 @@
 import aiosqlite
 from os import getenv
-from store.models import Module, Task, TaskAnswer
-from store.models.test_answer import TestAnswer
 
 SQLITE_PATH = getenv("SQLITE_PATH")
 
