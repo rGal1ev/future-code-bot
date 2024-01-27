@@ -12,7 +12,7 @@ from aiogram_dialog.widgets.text import Text
 from aiogram_dialog.widgets.widget_event import WidgetEventProcessor
 import pickle
 
-from bot.utils import _dump
+from bot.utils import _dumps
 
 
 def AlertTrigger(text: Text,
@@ -27,16 +27,13 @@ def AlertTrigger(text: Text,
     async def alert_button_handler(callback: CallbackQuery, button: Button,
                                    manager: DialogManager):
 
-        # handler_bytes = pickle.dumps(on_process)
-        # handler_string = base64.b64encode(handler_bytes).decode("UTF-8")
-
         alert_payload = {
             "alert_title": title,
             "alert_description": description,
-            "alert_handler": _dump(on_process),
+            "alert_handler": _dumps(on_process),
             "alert_process_button_text": process_button_text,
             "alert_back_button_text": back_button_text,
-            "alert_previous_state": _dump(manager.current_context().state)
+            "alert_previous_state": _dumps(manager.current_context().state)
         }
 
         await manager.update(alert_payload)

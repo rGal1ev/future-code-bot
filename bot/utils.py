@@ -57,7 +57,7 @@ def _get(key):
     return f
 
 
-def _dump(item):
+def _dumps(item):
     handler_bytes = dumps(item)
     handler_string = b64encode(handler_bytes).decode("UTF-8")
 
