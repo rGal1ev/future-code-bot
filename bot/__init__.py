@@ -5,7 +5,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from os import getenv
 from config import Config
 from aiogram_dialog import setup_dialogs
-from redis.asyncio import Redis
+from redis.asyncio import Redis, StrictRedis
 from .dialogs import main, task, test
 
 dispatcher = None
@@ -17,7 +17,7 @@ if Config().is_dev:
 
 else:
     dispatcher = Dispatcher(
-        storage=RedisStorage(Redis(), DefaultKeyBuilder(with_destiny=True))
+        storage=RedisStorage(StrictRedis(), DefaultKeyBuilder(with_destiny=True))
     )
 
 dispatcher.include_routers(
