@@ -3,13 +3,17 @@ from aiogram_dialog.widgets.input import TextInput
 from aiogram_dialog.widgets.kbd import Cancel, Select, Column, Button, Row, ScrollingGroup, SwitchTo
 from aiogram_dialog.widgets.text import Const, Format, Jinja
 
-from .data import list_window_data, answers_edit_data, test_preview_data
-from .events import on_module_selected, on_module_deselect, on_answers_edit, on_new_answer, on_answer_action_change, \
-    on_answer_edit, on_back_to_list, on_save_answer, on_answer_clicked, on_answer_delete, on_answer_preview_clicked, \
-    on_show_preview, on_show_preview_close
+from .events import (
+    handle_module_select, handle_module_deselect, handle_answers_edit_transition,
+    handle_answer_edit_transition, handle_answer_action_change, handle_user_answer_info_input,
+    handle_back_to_answers_edit_transition, handle_answer_saving, handle_answer_select, handle_answer_delete,
+    handle_answer_preview_select, handle_preview_transition, handle_dynamically_transition
+)
+
 from .templates import list_window_template, answer_edit_window_template, test_preview_window_template
-from .utils import module_id_getter, not_is_module_selected, test_id_getter, is_answer_ready
+from .data import list_window_data, answers_edit_data, test_preview_data
 from ..state import TestWindow
+from ...utils import get_property, _not, _and
 
 list_window = Window(
     list_window_template,
@@ -19,19 +23,19 @@ list_window = Window(
             Format("» {item.number} - {item.title}"),
 
             items="modules",
-            item_id_getter=module_id_getter,
+            item_id_getter=get_property("id"),
             id="module_list",
 
-            on_click=on_module_selected
+            on_click=handle_module_select
         ),
-        when=not_is_module_selected
+        when=_not("is_module_selected")
     ),
 
     Column(
         Button(
             text=Const("Показать ответы"),
             id="start_test",
-            on_click=on_show_preview,
+            on_click=handle_preview_transition,
         ),
 
         Button(
@@ -43,7 +47,7 @@ list_window = Window(
         Button(
             text=Const("✏️ Редактировать ответы"),
             id="edit_answers",
-            on_click=on_answers_edit,
+            on_click=handle_answers_edit_transition,
             when="is_admin"
         ),
 
@@ -54,7 +58,7 @@ list_window = Window(
         Button(
             text=Const("« Назад"),
             id="deselect_module",
-            on_click=on_module_deselect,
+            on_click=handle_module_deselect,
             when="is_module_selected"
         ),
         Cancel(
@@ -73,9 +77,9 @@ answers_edit_window = Window(
             Format("» Вопрос {item.number}"),
 
             items="test_answers",
-            item_id_getter=test_id_getter,
+            item_id_getter=get_property("id"),
             id="test_list",
-            on_click=on_answer_clicked
+            on_click=handle_answer_select
         ),
 
         width=1,
@@ -92,7 +96,7 @@ answers_edit_window = Window(
         Button(
             text=Const("🟢 Добавить"),
             id="add_new_answer",
-            on_click=on_new_answer
+            on_click=handle_answer_edit_transition
         ),
     ),
 
@@ -103,17 +107,17 @@ answers_edit_window = Window(
 answer_edit_window = Window(
     answer_edit_window_template,
     TextInput(
-        id="on_answer_edit",
-        on_success=on_answer_edit
+        id="answer_info",
+        on_success=handle_user_answer_info_input
     ),
     Button(
         text=Jinja("""{{ '✓ ' if number else '' }}Указать номер"""),
-        on_click=on_answer_action_change,
+        on_click=handle_answer_action_change,
         id="number"
     ),
     Button(
         text=Jinja("""{{ '✓ ' if value else '' }}Указать ответ"""),
-        on_click=on_answer_action_change,
+        on_click=handle_answer_action_change,
         id="value"
     ),
 
@@ -125,7 +129,7 @@ answer_edit_window = Window(
 
     Button(
         text=Const("🔴 Удалить"),
-        on_click=on_answer_delete,
+        on_click=handle_answer_delete,
         id="delete_answer",
         when="selected_answer"
     ),
@@ -134,13 +138,13 @@ answer_edit_window = Window(
         Button(
             text=Const("« Назад"),
             id="back_to_list",
-            on_click=on_back_to_list
+            on_click=handle_back_to_answers_edit_transition
         ),
         Button(
             text=Const("🟢 Сохранить"),
             id="save_answer",
-            on_click=on_save_answer,
-            when=is_answer_ready
+            on_click=handle_answer_saving,
+            when=_and("number", "value")
         ),
     ),
 
@@ -152,7 +156,9 @@ answer_edit_window = Window(
 test_preview_window = Window(
     test_preview_window_template,
     Button(
-        text=Jinja("""{{ 'Выбран » ' + selected_answer.number|string if selected_answer else 'Не выбрано' }}"""),
+        text=Jinja(
+            """{{ 'Выбран » ' + selected_answer.number|string if selected_answer else 'Не выбрано' }}"""
+        ),
         id="current_answer"
     ),
     ScrollingGroup(
@@ -160,9 +166,9 @@ test_preview_window = Window(
             Jinja("""» Вопрос {{item.number}}"""),
 
             items="test_answers",
-            item_id_getter=test_id_getter,
+            item_id_getter=get_property("id"),
             id="test_list",
-            on_click=on_answer_preview_clicked
+            on_click=handle_answer_preview_select
         ),
 
         width=1,
@@ -175,12 +181,12 @@ test_preview_window = Window(
         Button(
             text=Const("« Назад"),
             id="list",
-            on_click=on_show_preview_close
+            on_click=handle_dynamically_transition
         ),
         Button(
             text=Const("☰ Выйти"),
             id="menu",
-            on_click=on_show_preview_close
+            on_click=handle_dynamically_transition
         )
     ),
 

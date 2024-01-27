@@ -1,4 +1,3 @@
-from aiogram.methods import Close
 from aiogram.types import CallbackQuery
 from aiogram_dialog import Window, DialogManager
 from aiogram_dialog.widgets.kbd import Button, Url, Column, Row, Cancel
@@ -11,7 +10,7 @@ from os import getenv
 
 async def handle_switch(callback: CallbackQuery, button: Button,
                         manager: DialogManager):
-    is_user_admin = str(callback.from_user.id) in getenv("ADMIN_ID")
+    is_user_admin = str(callback.from_user.id) in getenv("ADMIN_ID_LIST")
 
     if button.widget_id == "task":
         await manager.start(

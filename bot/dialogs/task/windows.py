@@ -1,36 +1,44 @@
-from aiogram_dialog import Window
+from aiogram.types import CallbackQuery
+from aiogram_dialog import Window, DialogManager
 from aiogram_dialog.widgets.input import TextInput
-from aiogram_dialog.widgets.kbd import Cancel, Select, Column, Button, Row, SwitchTo, Back, ScrollingGroup, Url
+from aiogram_dialog.widgets.kbd import (
+    Cancel, Select, Column, Button, Row, SwitchTo, Back, ScrollingGroup, Url, NextPage, PrevPage
+)
 from aiogram_dialog.widgets.text import Const, Format, Jinja
 
 from .events import (
-    on_module_selected, on_module_deselect, on_task_selected, on_task_deselect, on_new_module_update,
-    on_delete_module, on_new_task_action_change, on_new_task_update, on_task_create, on_task_delete,
-    on_task_answer_select, on_task_answer_action_change, on_task_answer_update, on_task_answer_save, on_new_task_answer,
-    on_task_answer_delete, on_back_to_answers_list, on_task_purpose_generate
+    handle_module_select, handle_module_deselect, handle_task_select, handle_task_deselect,
+    handle_module_info_input, handle_module_delete, handle_task_action_change, handle_task_info_input,
+    handle_task_create, handle_task_delete, handle_task_answer_select, handle_task_answer_action_input,
+    handle_task_answer_info_input, handle_task_answer_saving, handle_task_answer_delete,
+    handle_task_answers_edit_transition, handle_task_solution_generate
 )
-from .utils import (
-    module_id_getter, is_module_not_selected, task_id_getter, is_ready_to_generate,
-    not_is_ready_to_generate, is_task_ready, task_answer_id_getter
+from .templates import (
+    main_window_template, new_module_window_template, new_task_window_template,
+    task_answer_edit_window_template, solution_preview_window_template, task_answers_edit_window_template
+)
+from .data import (
+    list_window_data, new_module_data, new_task_data,
+    answer_tasks_data, solution_preview_data
 )
 
 from ..state import TaskWindow
-from .templates import main_window_template, new_module_window_template, new_task_window_template, \
-    task_answer_edit_window_template, solution_preview_window_template
-from .data import list_window_data, new_module_data, new_task_data, answer_tasks_data, solution_preview_data
+from ...utils import _and, _not, get_property
+from ...widgets.alert import AlertTrigger
 
 list_window = Window(
     main_window_template,
+
     Column(
         Column(
             Select(
                 Format("» {item.number} - {item.title}"),
 
                 items="modules",
-                item_id_getter=module_id_getter,
+                item_id_getter=get_property("id"),
                 id="module_list",
 
-                on_click=on_module_selected
+                on_click=handle_module_select
             ),
             Button(
                 text=Const("⠀"),
@@ -43,7 +51,7 @@ list_window = Window(
                 state=TaskWindow.new_module,
                 when="is_admin"
             ),
-            when=is_module_not_selected
+            when=_not("is_module_selected")
         ),
 
         Column(
@@ -51,10 +59,10 @@ list_window = Window(
                 Format("» {item.number} - {item.title}"),
 
                 items="tasks",
-                item_id_getter=task_id_getter,
+                item_id_getter=get_property("id"),
                 id="task_list",
 
-                on_click=on_task_selected
+                on_click=handle_task_select
             ),
             Button(
                 text=Const("⠀"),
@@ -70,19 +78,19 @@ list_window = Window(
             Button(
                 id="delete_module",
                 text=Const("🔴 Удалить модуль"),
-                on_click=on_delete_module,
+                on_click=handle_module_delete,
                 when="is_admin"
             ),
             when="is_module_selected"
         ),
-        when=not_is_ready_to_generate
+        when=_and("!is_module_selected", "!is_task_selected")
     ),
 
     Column(
         Button(
             text=Const("↻ Сгенерировать ответ"),
             id="generate_task",
-            on_click=on_task_purpose_generate
+            on_click=handle_task_solution_generate
         ),
         Button(
             text=Const("⠀"),
@@ -95,31 +103,42 @@ list_window = Window(
             state=TaskWindow.task_answers_edit,
             when="is_admin"
         ),
-        Button(
-            id="delete_task",
+        AlertTrigger(
             text=Const("🔴 Удалить работу"),
-            on_click=on_task_delete,
+            state=TaskWindow.alert,
+
+            title="Удалить работу?",
+            description="Восстановить работу будет невозможно",
+            on_process=handle_task_delete,
+
+            id="show_alert",
             when="is_admin"
         ),
-        when=is_ready_to_generate
+        # Button(
+        #     id="delete_task",
+        #     text=Const("🔴 Удалить работу"),
+        #     on_click=handle_task_delete,
+        #     when="is_admin"
+        # ),
+        when=_and("is_module_selected", "is_task_selected")
     ),
 
     Row(
         Button(
             text=Const("« Назад"),
             id="deselect_task",
-            on_click=on_task_deselect,
-            when=is_ready_to_generate
+            on_click=handle_task_deselect,
+            when=_and("is_module_selected", "is_task_selected")
         ),
 
         Row(
             Button(
                 text=Const("« Назад"),
                 id="deselect_module",
-                on_click=on_module_deselect,
+                on_click=handle_module_deselect,
                 when="is_module_selected"
             ),
-            when=not_is_ready_to_generate
+            when=_and("!is_module_selected", "!is_task_selected")
         ),
 
         Cancel(
@@ -135,7 +154,7 @@ new_module_window = Window(
     new_module_window_template,
 
     TextInput(
-        on_success=on_new_module_update,
+        on_success=handle_module_info_input,
         id="module_info",
     ),
     Back(
@@ -146,33 +165,34 @@ new_module_window = Window(
     state=TaskWindow.new_module
 )
 
+
 new_task_window = Window(
     new_task_window_template,
     TextInput(
         id="task_info",
-        on_success=on_new_task_update
+        on_success=handle_task_info_input
     ),
     Button(
         text=Jinja("""{{ '✓ ' if number else '' }}Указать номер"""),
-        on_click=on_new_task_action_change,
+        on_click=handle_task_action_change,
         id="number"
     ),
     Button(
         text=Jinja("""{{ '✓ ' if title else '' }}Указать название"""),
-        on_click=on_new_task_action_change,
+        on_click=handle_task_action_change,
         id="title"
     ),
     Button(
         text=Jinja("""{{ '✓ ' if min_answers_count else '' }}Указать количество"""),
-        on_click=on_new_task_action_change,
+        on_click=handle_task_action_change,
         id="min_answers_count"
     ),
 
     Button(
         text=Const("🟢 Создать"),
         id="create_task",
-        on_click=on_task_create,
-        when=is_task_ready
+        on_click=handle_task_create,
+        when=_and("number", "title", "min_answers_count")
     ),
 
     SwitchTo(
@@ -187,21 +207,32 @@ new_task_window = Window(
 )
 
 task_answers_edit_window = Window(
-    Const("<b>Редактирование ответов</b>"),
+    task_answers_edit_window_template,
 
     ScrollingGroup(
         Select(
             items="task_answers",
             id="task_answers_list",
             text=Format("» {item.number} Вопрос"),
-            item_id_getter=task_answer_id_getter,
-            on_click=on_task_answer_select
+            item_id_getter=get_property("id"),
+            on_click=handle_task_answer_select
         ),
 
         width=1,
         height=4,
-        hide_on_single_page=True,
+        hide_pager=True,
         id="task_answers_list_paginator"
+    ),
+
+    Row(
+        PrevPage(
+            text=Const("◀"),
+            scroll="task_answers_list_paginator"
+        ),
+        NextPage(
+            text=Const("▶"),
+            scroll="task_answers_list_paginator"
+        )
     ),
 
     Row(
@@ -210,10 +241,10 @@ task_answers_edit_window = Window(
             state=TaskWindow.list,
             id="back_to_list"
         ),
-        Button(
+        SwitchTo(
             text=Const("🟢 Добавить"),
             id="add_new_task_answer",
-            on_click=on_new_task_answer
+            state=TaskWindow.task_answer_edit
         )
     ),
 
@@ -225,18 +256,18 @@ task_answer_edit_window = Window(
     task_answer_edit_window_template,
 
     TextInput(
-        on_success=on_task_answer_update,
+        on_success=handle_task_answer_info_input,
         id="task_answer_info",
     ),
 
     Button(
         text=Jinja("""{{ '✓ ' if number else '' }}Указать номер"""),
-        on_click=on_task_answer_action_change,
+        on_click=handle_task_answer_action_input,
         id="number"
     ),
     Button(
         text=Jinja("""{{ '✓ ' if value else '' }}Указать ответ"""),
-        on_click=on_task_answer_action_change,
+        on_click=handle_task_answer_action_input,
         id="value"
     ),
 
@@ -246,23 +277,28 @@ task_answer_edit_window = Window(
         when="is_admin"
     ),
 
-    Button(
-        text=Const("🔴 Удалить ответ"),
-        on_click=on_task_answer_delete,
-        id="empty",
+    AlertTrigger(
+        text=Format("🔴 Удалить ответ"),
+        state=TaskWindow.alert,
+
+        title="Удалить ответ?",
+        description="Восстановить ответ будет невозможно",
+        on_process=handle_task_answer_delete,
+
+        id="show_alert",
         when="task_answer_id"
     ),
 
     Row(
         Button(
             text=Const("« Назад"),
-            on_click=on_back_to_answers_list,
+            on_click=handle_task_answers_edit_transition,
             id="back_to_list"
         ),
         Button(
             text=Const("🟢 Сохранить"),
             id="save_task_answer",
-            on_click=on_task_answer_save
+            on_click=handle_task_answer_saving
         )
     ),
 
