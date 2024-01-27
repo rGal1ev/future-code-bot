@@ -14,13 +14,14 @@ from .templates import list_window_template, answer_edit_window_template, test_p
 from .data import list_window_data, answers_edit_data, test_preview_data
 from ..state import TestWindow
 from ...utils import _get, _not, _and
+from ...widgets.alert import AlertTrigger
 
 list_window = Window(
     list_window_template,
 
     Column(
         Select(
-            Format("» {item.number} - {item.title}"),
+            Format("» {item[number]} - {item[title]}"),
 
             items="modules",
             item_id_getter=_get("id"),
@@ -74,7 +75,7 @@ answers_edit_window = Window(
     Const("<b>Редактирование ответов теста</b>"),
     ScrollingGroup(
         Select(
-            Format("» Вопрос {item.number}"),
+            Format("» Вопрос {item[number]}"),
 
             items="test_answers",
             item_id_getter=_get("id"),
@@ -127,10 +128,15 @@ answer_edit_window = Window(
         when="is_admin"
         ),
 
-    Button(
+    AlertTrigger(
         text=Const("🔴 Удалить"),
-        on_click=handle_answer_delete,
-        id="delete_answer",
+        state=TestWindow.alert,
+
+        title="Удалить ответ?",
+        description="Восстановить ответ будет невозможно",
+        on_process=handle_answer_delete,
+
+        id="show_alert",
         when="selected_answer"
     ),
 
@@ -157,13 +163,13 @@ test_preview_window = Window(
     test_preview_window_template,
     Button(
         text=Jinja(
-            """{{ 'Выбран » ' + selected_answer.number|string if selected_answer else 'Не выбрано' }}"""
+            """{{ 'Выбран » ' + selected_answer['number']|string if selected_answer else 'Не выбрано' }}"""
         ),
         id="current_answer"
     ),
     ScrollingGroup(
         Select(
-            Jinja("""» Вопрос {{item.number}}"""),
+            Jinja("""» Вопрос {{item['number']}}"""),
 
             items="test_answers",
             item_id_getter=_get("id"),

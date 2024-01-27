@@ -32,7 +32,7 @@ async def handle_module_deselect(callback: CallbackQuery, button: Button,
 
 async def handle_answers_edit_transition(callback: CallbackQuery, button: Button,
                                          manager: DialogManager):
-    module_id = manager.dialog_data.get("selected_module").id
+    module_id = manager.dialog_data.get("selected_module")['id']
     test_answers = await get_test_answers(module_id)
 
     manager.dialog_data.update({
@@ -96,14 +96,14 @@ async def handle_answer_saving(callback: CallbackQuery, button: Button,
     value = manager.dialog_data.get("value")
 
     if selected_answer:
-        await update_test_answer(selected_answer.id, number, value)
+        await update_test_answer(selected_answer['id'], number, value)
         await manager.switch_to(
             state=TestWindow.answers_edit
         )
 
     else:
-        await add_test_answer(selected_module.id, number, value)
-        test_answers = await get_test_answers(selected_module.id)
+        await add_test_answer(selected_module['id'], number, value)
+        test_answers = await get_test_answers(selected_module['id'])
 
         manager.dialog_data.update({
             "test_answers": test_answers
@@ -127,8 +127,8 @@ async def handle_answer_select(callback: CallbackQuery, button: Button,
 
     manager.dialog_data.update({
         "selected_answer": selected_answer,
-        "number": selected_answer.number,
-        "value": selected_answer.value
+        "number": selected_answer['number'],
+        "value": selected_answer['value']
     })
 
     await manager.switch_to(
@@ -138,8 +138,8 @@ async def handle_answer_select(callback: CallbackQuery, button: Button,
 
 async def handle_answer_delete(callback: CallbackQuery, button: Button,
                                manager: DialogManager):
-    answer_id = manager.dialog_data.get("selected_answer").id
-    module_id = manager.dialog_data.get("selected_module").id
+    answer_id = manager.dialog_data.get("selected_answer")['id']
+    module_id = manager.dialog_data.get("selected_module")['id']
 
     await delete_test_answer_by_id(answer_id)
     test_answers = await get_test_answers(module_id)
@@ -165,7 +165,7 @@ async def handle_answer_preview_select(callback: CallbackQuery, button: Button,
 
 async def handle_preview_transition(callback: CallbackQuery, button: Button,
                                     manager: DialogManager):
-    module_id = manager.dialog_data.get("selected_module").id
+    module_id = manager.dialog_data.get("selected_module")['id']
     test_answers = await get_test_answers(module_id)
 
     manager.dialog_data.update({

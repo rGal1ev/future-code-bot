@@ -5,8 +5,8 @@ list_window_template = Jinja("""
 
 {% if is_module_selected %}
 ─────────
-✦ Выбран <b>{{ selected_module.number }}</b> модуль
-➤ <b>{{ selected_module.title }}</b>
+✦ Выбран <b>{{ selected_module["number"] }}</b> модуль
+➤ <b>{{ selected_module["title"] }}</b>
 ─────────
 {% else %}
 ❶ Выберите модуль
@@ -30,6 +30,6 @@ test_preview_window_template = Jinja("""
 {% if not selected_answer %}
 Выберите вопрос ниже ▼
 {% else %}
-<pre language="python">{{ selected_answer.value }}</pre>
+<pre language="python">{{ selected_answer["value"] }}</pre>
 {% endif %}
 """)

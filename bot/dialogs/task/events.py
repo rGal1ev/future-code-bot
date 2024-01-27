@@ -89,6 +89,10 @@ async def handle_module_delete(callback: CallbackQuery, button: Button,
             "is_module_selected": False
         })
 
+    await manager.switch_to(
+        TaskWindow.list
+    )
+
 
 async def handle_task_action_change(callback: CallbackQuery, button: Button,
                                     manager: DialogManager):

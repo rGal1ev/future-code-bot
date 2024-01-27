@@ -24,3 +24,5 @@ class TestWindow(StatesGroup):
 
     answers_edit = State()
     answer_edit = State()
+
+    alert = State()

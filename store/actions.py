@@ -171,20 +171,18 @@ async def delete_task_answer_by_id(task_answer: int):
         await connection.commit()
 
 
-async def get_test_answers(module_id: int) -> list[TestAnswer]:
+async def get_test_answers(module_id: int) -> list[dict]:
     async with aiosqlite.connect(SQLITE_PATH) as connection:
         test_answers = []
         connection.row_factory = aiosqlite.Row
 
         async with connection.execute(f"SELECT * FROM TestAnswers WHERE MODULE_ID = {module_id} ORDER BY NUMBER") as cursor:
             async for row in cursor:
-                test_answers.append(
-                    TestAnswer(
-                        id=row["ID"],
-                        number=row["NUMBER"],
-                        value=row["VALUE"]
-                    )
-                )
+                test_answers.append({
+                    "id": row["ID"],
+                    "number": row["NUMBER"],
+                    "value": row["VALUE"]
+                })
 
             return test_answers
 
@@ -214,15 +212,17 @@ async def add_test_answer(module_id: int, number: int, value: str) -> None:
         await connection.commit()
 
 
-async def get_test_answer_by_id(test_answer_id: int) -> TestAnswer:
+async def get_test_answer_by_id(test_answer_id: int) -> dict:
     async with aiosqlite.connect(SQLITE_PATH) as connection:
         connection.row_factory = aiosqlite.Row
 
         async with connection.execute(f"SELECT * FROM TestAnswers WHERE ID = {test_answer_id}") as cursor:
             async for row in cursor:
-                return TestAnswer(id=row["ID"],
-                                  number=row["NUMBER"],
-                                  value=row["VALUE"])
+                return {
+                    "id": row["ID"],
+                    "number": row["NUMBER"],
+                    "value": row["VALUE"]
+                }
 
 
 async def delete_test_answer_by_id(test_answer: int):

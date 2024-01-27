@@ -75,10 +75,15 @@ list_window = Window(
                 state=TaskWindow.new_task,
                 when="is_admin"
             ),
-            Button(
-                id="delete_module",
+            AlertTrigger(
                 text=Const("🔴 Удалить модуль"),
-                on_click=handle_module_delete,
+                state=TaskWindow.alert,
+
+                title="Удалить модуль?",
+                description="Восстановить модуль будет невозможно",
+                on_process=handle_module_delete,
+
+                id="show_alert",
                 when="is_admin"
             ),
             when="is_module_selected"
@@ -114,12 +119,7 @@ list_window = Window(
             id="show_alert",
             when="is_admin"
         ),
-        # Button(
-        #     id="delete_task",
-        #     text=Const("🔴 Удалить работу"),
-        #     on_click=handle_task_delete,
-        #     when="is_admin"
-        # ),
+
         when=_and("is_module_selected", "is_task_selected")
     ),
 
