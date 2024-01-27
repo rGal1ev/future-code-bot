@@ -1,3 +1,4 @@
+import base64
 from typing import Callable
 
 from aiogram.fsm.state import State
@@ -34,7 +35,9 @@ def AlertWindow(state: State) -> Window:
 
     async def handle_process_button(callback: CallbackQuery, button: Button,
                                     manager: DialogManager):
-        handler: Callable = loads(manager.dialog_data.get("alert_handler"))
+        handler_string = manager.dialog_data.get("alert_handler")
+        handler_bytes = base64.b64decode(handler_string)
+        handler: Callable = loads(handler_bytes)
 
         await handler(callback, button, manager)
         await clear_alert_payload(manager)

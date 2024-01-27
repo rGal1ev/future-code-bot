@@ -1,3 +1,4 @@
+import base64
 import pprint
 from typing import Union
 
@@ -23,10 +24,13 @@ def AlertTrigger(text: Text,
                  back_button_text: str | None = "Назад") -> Button:
     async def alert_button_handler(callback: CallbackQuery, button: Button,
                                    manager: DialogManager):
+        handler_bytes = pickle.dumps(on_process)
+        handler_string = base64.b64encode(handler_bytes).decode("UTF-8")
+
         alert_payload = {
             "alert_title": title,
             "alert_description": description,
-            "alert_handler": pickle.dumps(on_process),
+            "alert_handler":  handler_string,
             "alert_process_button_text": process_button_text,
             "alert_back_button_text": back_button_text,
             "alert_previous_state": manager.current_context().state
