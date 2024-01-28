@@ -16,6 +16,7 @@ class TaskWindow(StatesGroup):
     task_answer_edit = State()
 
     alert = State()
+    form = State()
 
 
 class TestWindow(StatesGroup):

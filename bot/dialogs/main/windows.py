@@ -44,14 +44,14 @@ main_window = Window(
         ),
     ),
 
-    Row(
-        Cancel(
-            text=Const("✖ Завершить")
-        ),
-        Url(
-            text=Const("🌐 Сайт"),
-            url=Const("https://online-vstu.ru/login")
-        ),
+    Button(
+        text=Const("⠀"),
+        id="separator",
+    ),
+
+    Url(
+        text=Const("🌐 Сайт"),
+        url=Const("https://online-vstu.ru/login")
     ),
 
     state=MainWindow.main

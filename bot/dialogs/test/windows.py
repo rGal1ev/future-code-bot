@@ -1,6 +1,6 @@
 from aiogram_dialog import Window
 from aiogram_dialog.widgets.input import TextInput
-from aiogram_dialog.widgets.kbd import Cancel, Select, Column, Button, Row, ScrollingGroup, SwitchTo
+from aiogram_dialog.widgets.kbd import Cancel, Select, Column, Button, Row, ScrollingGroup, SwitchTo, PrevPage, NextPage
 from aiogram_dialog.widgets.text import Const, Format, Jinja
 
 from .events import (
@@ -41,8 +41,7 @@ list_window = Window(
 
         Button(
             text=Const("⠀"),
-            id="separator",
-            when="is_admin"
+            id="separator"
         ),
 
         Button(
@@ -124,9 +123,8 @@ answer_edit_window = Window(
 
     Button(
         text=Const("⠀"),
-        id="separator",
-        when="is_admin"
-        ),
+        id="separator"
+    ),
 
     AlertTrigger(
         text=Const("🔴 Удалить"),
@@ -178,9 +176,25 @@ test_preview_window = Window(
         ),
 
         width=1,
-        height=4,
-        hide_on_single_page=True,
+        height=3,
+        hide_pager=True,
         id="test_answers_list_paginator"
+    ),
+
+    Row(
+        PrevPage(
+            text=Const("◀"),
+            scroll="test_answers_list_paginator"
+        ),
+        NextPage(
+            text=Const("▶"),
+            scroll="test_answers_list_paginator"
+        )
+    ),
+
+    Button(
+            text=Const("⠀"),
+            id="separator"
     ),
 
     Row(

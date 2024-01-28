@@ -5,5 +5,5 @@ from .alert_window import AlertWindow
 __all__ = [
     "AlertWindow",
     "AlertTrigger",
-    "generate_alert_data"
+    "generate_alert_data",
 ]

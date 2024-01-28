@@ -21,22 +21,6 @@ async def list_window_data(dialog_manager: DialogManager, **kwargs):
     }
 
 
-async def new_module_data(dialog_manager: DialogManager, **kwargs):
-    return {
-        "message": dialog_manager.dialog_data.get("message", "")
-    }
-
-
-async def new_task_data(dialog_manager: DialogManager, **kwargs):
-    return {
-        "action": dialog_manager.dialog_data.get("action", None),
-
-        "number": dialog_manager.dialog_data.get("number", None),
-        "title": dialog_manager.dialog_data.get("title", None),
-        "min_answers_count": dialog_manager.dialog_data.get("min_answers_count", None)
-    }
-
-
 async def answer_tasks_data(dialog_manager: DialogManager, **kwargs):
     return {
         "tasks": dialog_manager.dialog_data.get("tasks", []),

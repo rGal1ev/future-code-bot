@@ -34,20 +34,37 @@ async def get_module_by_id(module_id: int) -> dict:
                 }
 
 
-async def add_module(number: int, title: str) -> bool:
+async def add_module(number: int, title: str):
     async with aiosqlite.connect(SQLITE_PATH) as connection:
-        await connection.execute("INSERT INTO Modules(NUMBER, TITLE) VALUES (?, ?);", [number, title])
+        cursor = await connection.cursor()
+
+        await cursor.execute("INSERT INTO Modules(NUMBER, TITLE) VALUES (?, ?);", [number, title])
+        module_id = cursor.lastrowid
+
         await connection.commit()
+        return module_id
 
-        return connection.total_changes > 0
 
-
-async def delete_module(module_id: int) -> bool:
+async def delete_module(module_id: int):
     async with aiosqlite.connect(SQLITE_PATH) as connection:
         await connection.execute(f"DELETE FROM Modules WHERE ID = {module_id}")
         await connection.commit()
 
-        return connection.total_changes > 0
+
+async def update_module(module_id: int, title: str, number: int):
+    async with aiosqlite.connect(SQLITE_PATH) as connection:
+        connection.row_factory = aiosqlite.Row
+
+        await connection.execute("""
+            UPDATE Modules
+            SET NUMBER = ?,
+                TITLE = ?
+
+            WHERE
+                ID = ?
+        """, [number, title, module_id])
+
+        await connection.commit()
 
 
 async def get_tasks(module_id: int) -> list[dict]:
@@ -92,14 +109,34 @@ async def get_task_by_id(task_id: int) -> dict:
 async def add_task(title: str, number: int,
                    min_answers_count: int, module_id: int):
     async with aiosqlite.connect(SQLITE_PATH) as connection:
-        await connection.execute(
+        cursor = await connection.cursor()
+
+        await cursor.execute(
             "INSERT INTO Tasks(TITLE, NUMBER, MIN_ANSWERS_COUNT, MODULE_ID) VALUES (?, ?, ?, ?);",
             [title,
              number,
              min_answers_count,
              module_id])
 
+        task_id = cursor.lastrowid
+
         await connection.commit()
+        return task_id
+
+# async def add_task(title: str, number: int,
+#                    min_answers_count: int, module_id: int):
+#     async with aiosqlite.connect(SQLITE_PATH) as connection:
+#         await connection.execute(
+#             "INSERT INTO Tasks(TITLE, NUMBER, MIN_ANSWERS_COUNT, MODULE_ID) VALUES (?, ?, ?, ?);",
+#             [title,
+#              number,
+#              min_answers_count,
+#              module_id])
+#
+#         await connection.commit()
+#
+#         task_id = connection.
+#         return task_id
 
 
 async def delete_task(task_id: int) -> bool:
@@ -108,6 +145,25 @@ async def delete_task(task_id: int) -> bool:
         await connection.commit()
 
         return connection.total_changes > 0
+
+
+async def update_task(task_id: int, title: str, number: int,
+                      min_answers_count: int, module_id: int):
+    async with aiosqlite.connect(SQLITE_PATH) as connection:
+        connection.row_factory = aiosqlite.Row
+
+        await connection.execute("""
+            UPDATE Tasks
+            SET NUMBER = ?,
+                TITLE = ?,
+                MIN_ANSWERS_COUNT = ?,
+                MODULE_ID = ?
+
+            WHERE
+                ID = ?
+        """, [number, title, min_answers_count, module_id, task_id])
+
+        await connection.commit()
 
 
 async def get_task_answers(task_id: int) -> list[dict]:
@@ -174,7 +230,8 @@ async def get_test_answers(module_id: int) -> list[dict]:
         test_answers = []
         connection.row_factory = aiosqlite.Row
 
-        async with connection.execute(f"SELECT * FROM TestAnswers WHERE MODULE_ID = {module_id} ORDER BY NUMBER") as cursor:
+        async with connection.execute(
+                f"SELECT * FROM TestAnswers WHERE MODULE_ID = {module_id} ORDER BY NUMBER") as cursor:
             async for row in cursor:
                 test_answers.append({
                     "id": row["ID"],
