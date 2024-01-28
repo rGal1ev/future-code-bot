@@ -24,7 +24,7 @@ def FormTrigger(text: Text,
         prepared_model, model_buttons, max_id = use_models(model)
 
         form_payload = {
-            "previous_state": manager.current_context().state,
+            "previous_state": _dumps(manager.current_context().state),
             "model": prepared_model,
             "model_buttons": model_buttons,
             "handler": _dumps(handler),

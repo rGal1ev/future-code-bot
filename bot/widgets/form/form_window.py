@@ -45,7 +45,7 @@ def FormWindow(state: State) -> Window:
 
     async def handle_back_button(callback: CallbackQuery, button: Button,
                                  manager: DialogManager):
-        previous_state: State = manager.dialog_data.get("form_data").get("previous_state")
+        previous_state: State = _loads(manager.dialog_data.get("form_data").get("previous_state"))
 
         await manager.switch_to(previous_state)
         await clear_payload(manager)
