@@ -32,4 +32,6 @@ async def handle_bot():
     )
 
     setup_dialogs(dispatcher)
+
+    await bot.delete_webhook()
     await dispatcher.start_polling(bot)

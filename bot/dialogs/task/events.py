@@ -1,4 +1,6 @@
-from aiogram.types import CallbackQuery, Message
+from io import BytesIO
+
+from aiogram.types import CallbackQuery, Message, InputFile, BufferedInputFile
 from aiogram_dialog import DialogManager
 from aiogram_dialog.widgets.input import ManagedTextInput
 from aiogram_dialog.widgets.kbd import Button
@@ -375,4 +377,16 @@ async def handle_task_edit(callback: CallbackQuery, button: Button,
         handler=handle_task_form_saving,
         delete_handler=handle_task_form_delete,
         state=TaskWindow.form
+    )
+
+
+async def handle_file_sending(callback: CallbackQuery, button: Button,
+                              manager: DialogManager):
+
+    solution: str = manager.dialog_data["solution"]
+    solution_buffer = BytesIO(solution.encode())
+    solution_file = BufferedInputFile(solution_buffer.read(), filename="Решение.py")
+
+    await callback.message.reply_document(
+        document=solution_file
     )

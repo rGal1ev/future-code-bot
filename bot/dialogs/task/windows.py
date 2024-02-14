@@ -8,7 +8,7 @@ from .events import (
     handle_module_select, handle_module_deselect, handle_task_select, handle_task_deselect,
     handle_task_create, handle_task_answer_select,
     handle_task_solution_generate, handle_task_answer_form_creation, handle_module_edit, handle_module_create,
-    handle_task_edit
+    handle_task_edit, handle_file_sending
 )
 from .templates import (
     main_window_template, solution_preview_window_template,
@@ -253,6 +253,12 @@ solution_preview_window = Window(
             text=Const("Открыть сайт"),
             url=Const("https://online-vstu.ru/login")
         )
+    ),
+
+    Button(
+        text=Const("Получить в виде файла"),
+        on_click=handle_file_sending,
+        id="get_as_file"
     ),
 
     getter=solution_preview_data,
