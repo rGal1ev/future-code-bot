@@ -1,37 +1,21 @@
 from aiogram import Dispatcher, Bot
 from aiogram.enums import ParseMode
-from aiogram.fsm.storage.redis import RedisStorage, DefaultKeyBuilder
 from aiogram.fsm.storage.memory import MemoryStorage
 from os import getenv
-from config import Config
 from aiogram_dialog import setup_dialogs
-from redis.asyncio import Redis, StrictRedis
 from .dialogs import main, task, test
 
-dispatcher = None
-
-if Config().is_dev:
-    dispatcher = Dispatcher(
-        storage=MemoryStorage()
-    )
-
-else:
-    dispatcher = Dispatcher(
-        storage=RedisStorage(StrictRedis(), DefaultKeyBuilder(with_destiny=True))
-    )
+dispatcher = Dispatcher(
+    storage=MemoryStorage()
+)
 
 dispatcher.include_routers(
     main, task, test
 )
 
+bot = Bot(
+    token=getenv("TELEGRAM_KEY"),
+    parse_mode=ParseMode.HTML
+)
 
-async def handle_bot():
-    bot = Bot(
-        token=getenv("TELEGRAM_KEY"),
-        parse_mode=ParseMode.HTML
-    )
-
-    setup_dialogs(dispatcher)
-
-    await bot.delete_webhook()
-    await dispatcher.start_polling(bot)
+setup_dialogs(dispatcher)
